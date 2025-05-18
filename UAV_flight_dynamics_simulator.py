@@ -59,6 +59,14 @@ def get_uav_parameters(name):
             "CL_0": 0.40, "CL_alpha": 5.7, "CL_q": 5.5, "CL_deltae": 0.5, "CL_u": 0.0,
             "CD_0": 0.06, "CD_alpha": 0.33, "CD_q": 0.0, "CD_deltae": 0.0, "CD_u": 0.0,
             "Cm_0": 0.0, "Cm_alpha": -0.6, "Cm_q": -5.0, "Cm_deltae": -1.0, "Cm_u": 0.0
+        },
+        "Heron2": {
+            "company": "IAI", "country": "Israel",
+            "mass": 1000, "S": 12.9, "c": 0.78, "b": 16.6, "Iyy": 4000, "Mach": 0.18,
+            # All values – assumed
+            "CL_0": 0.40, "CL_alpha": 5.7, "CL_q": 5.5, "CL_deltae": 0.5, "CL_u": 0.0,
+            "CD_0": 0.06, "CD_alpha": 0.33, "CD_q": 0.0, "CD_deltae": 0.0, "CD_u": 0.0,
+            "Cm_0": 0.0, "Cm_alpha": -0.6, "Cm_q": -5.0, "Cm_deltae": -1.0, "Cm_u": 0.0
         }
     }
     if name not in UAV_DB:
@@ -179,7 +187,7 @@ def plot_3d_trajectory(y, name):
 
 if __name__=="__main__":
     # Get valid UAV name first!
-    valid_names = ["TB2", "Anka", "Aksungur", "Karayel", "Predator", "Heron"]
+    valid_names = ["TB2", "Anka", "Aksungur", "Karayel", "Predator", "Heron", "Heron2"]
     while True:
         name = input(f"Select UAV {valid_names}: ")
         if name in valid_names:
