@@ -14,6 +14,7 @@ A Python tool to **simulate and visualize the longitudinal (pitch-axis) flight d
 | Karayel  | Vestel                      | Turkey  |
 | Predator | General Atomics             | USA     |
 | Heron    | Israel Aerospace Industries | Israel  |
+| Heron 2  | Israel Aerospace Industries | Israel  |
 
 > ⚠️ **Some aerodynamic and inertial values are estimated or assumed based on academic literature, public data, or similar vehicles.** See the [Bayraktar TB2 Model Documentation](./Bayraktar_TB2_sources.md) for detailed assumptions.
 
