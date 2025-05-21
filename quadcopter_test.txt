@@ -1,0 +1,46 @@
+# Simple test script for quadcopter simulator
+# This demonstrates basic motor control without keyboard input
+
+# Show current state
+state
+
+# Set all motors to 70% of hover speed (will stay on ground)
+hover
+all 3000
+run 2
+
+# Gradually increase to hover speed
+all 4000
+run 2
+all 5000
+run 2
+
+# Stay hovering for a while
+hover
+run 5
+
+# Create a simple movement pattern (roll right)
+m1 4000
+m4 4000
+run 2
+
+# Back to hover
+hover
+run 2
+
+# Create pitch forward motion
+m3 5500
+m4 5500
+run 2
+
+# Land by gradually reducing power
+hover
+run 1
+all 4000
+run 1
+all 3000
+run 1
+all 0
+
+# Display final state
+state 

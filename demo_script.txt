@@ -1,0 +1,57 @@
+# Demo script for quadcopter command simulator
+# This file contains a sequence of commands to demonstrate quadcopter behavior
+# Each line is executed as if typed in the command prompt
+
+# Start with basic information
+state
+
+# Set motors to slightly below hover speed
+all 4000
+
+# Wait a few seconds
+run 3
+
+# Increase front motors to create a pitch back motion
+m1 5000
+m2 5000
+run 2
+
+# Set all motors to hover speed
+hover
+run 2
+
+# Create a roll to the right
+m1 3500
+m4 3500
+run 2
+
+# Create a roll to the left
+m1 5500
+m2 3500
+m3 3500
+m4 5500
+run 2
+
+# Return to hover
+hover
+run 3
+
+# Create a yaw rotation by differential torque
+# Increase CW motors (1,4) and decrease CCW motors (2,3)
+batch 5500 3000 3000 5500
+run 3
+
+# Create combined pitch and roll motion
+batch 6000 4000 3000 5000
+run 3
+
+# Slow descent by reducing all motors
+all 3800
+run 4
+
+# Land by reducing power gradually
+all 3000
+run 2
+all 2000
+run 1
+all 0 

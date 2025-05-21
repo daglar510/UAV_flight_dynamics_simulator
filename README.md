@@ -1,191 +1,178 @@
-# UAV Longitudinal Flight Dynamics Simulator
+# UAV Flight Dynamics Simulator
 
-A Python tool to **simulate and visualize the longitudinal (pitch-axis) flight dynamics** of real-world UAVs. Ideal for aerospace students, researchers, and engineers seeking to understand stability, control, and dynamic response from elevator maneuvers.
+A lightweight, powerful simulator for exploring UAV flight dynamics with both quadcopter and fixed-wing aircraft models.
 
----
+## Project Structure
 
-## ✈️ Supported UAV Models
-
-| UAV Name | Manufacturer                | Country |
-| -------- | --------------------------- | ------- |
-| TB2      | Baykar                      | Turkey  |
-| Anka     | TUSAŞ                       | Turkey  |
-| Aksungur | TUSAŞ                       | Turkey  |
-| Karayel  | Vestel                      | Turkey  |
-| Predator | General Atomics             | USA     |
-| Heron    | Israel Aerospace Industries | Israel  |
-| Heron 2  | Israel Aerospace Industries | Israel  |
-
-> ⚠️ **Some aerodynamic and inertial values are estimated or assumed based on academic literature, public data, or similar vehicles.** See the [Bayraktar TB2 Model Documentation](./Bayraktar_TB2_sources.md) for detailed assumptions.
-
----
-
-## 📐 How It Works
-
-This simulator models **longitudinal motion only** (no roll/yaw) using a **linearized state-space system**:
-
-* **State Vector:** `[u, α, q, θ]`
-
-  * `u`   — Forward speed deviation \[m/s]
-  * `α`   — Angle of attack \[radians]
-  * `q`   — Pitch rate \[radians/sec]
-  * `θ`   — Pitch angle \[radians]
-* **Input Vector:** `[thrust, elevator deflection]`
-
-  * Typically, only elevator is deflected (thrust held at trim).
-* **System Equation:**
-
-  * ẋ = **A**·x + **B**·u
-
-The `A` and `B` matrices are computed from each UAV’s unique aerodynamic and inertial properties.
-
-**Simulation is performed using** [`scipy.integrate.solve_ivp`](https://docs.scipy.org/doc/scipy/reference/generated/scipy.integrate.solve_ivp.html) (**Runge-Kutta 4(5)**), ensuring accurate time response to user-defined elevator pulses.
-
----
-
-## 🎯 What Can You Do With This?
-
-* **Visualize how elevator pulses affect UAV pitch and speed**
-* **Study short-period and phugoid modes** (see oscillations/damping)
-* **Compare stability and response across UAV designs**
-* **Analyze eigenvalues and mode properties** for basic flight test/controls work
-* **Educational demo** for stability & control courses
-
----
-
-## 📊 Output: What Do the Plots Show?
-
-After simulation, you’ll see:
-
-### 1. **Time-Domain Response (5 subplots)**
-
-**File:** `Figure_1.png`
-
-![Time-domain plots](Figure_1.png)
-
-* **u**: Forward speed deviation \[m/s]
-  *Shows phugoid oscillation and the immediate response to elevator pulse.*
-* **α**: Angle of attack (degrees)
-  *Displays both short-period (fast, damped) and phugoid (slow, lightly damped) dynamics.*
-* **q**: Pitch rate (degrees/sec)
-  *Captures rapid changes in pitch due to elevator input and short-period mode.*
-* **θ**: Pitch angle (degrees)
-  *Shows aircraft's nose-up/nose-down movement over time, combining all dynamic effects.*
-* **Elevator Input**: Commanded elevator angle (degrees)
-  *The input signal—here, a 2-degree pulse between t=5s and t=15s.*
-
-**Interpretation:**
-
-* The **short-period mode** is seen as a quick, heavily damped oscillation, especially in α and q.
-* The **phugoid mode** is a slow, lightly damped oscillation, especially evident in u and θ, representing the exchange between kinetic and potential energy.
-* If the states return to zero (equilibrium) after input, the UAV is stable.
-
----
-
-### 2. **3D Trajectory in State-Space**
-
-**File:** `Figure_1_3D.png`
-
-![3D state-space plot](Figure_1_3D.png)
-
-* **Axes:** α \[deg] (angle of attack), q \[deg/s] (pitch rate), θ \[deg] (pitch angle)
-* **Trajectory:**
-  The path shows how these three states evolve together after an elevator pulse. The **spiraling inward** reflects damped oscillations—initially, the system moves away from trim, then oscillates back as damping dominates.
-
-**Why this is useful:**
-
-* **Dynamic Coupling:** You see how pitch rate and angle of attack interact dynamically.
-* **Stability Visualization:** If the spiral closes in toward the center, the system is dynamically stable for that trim condition.
-* **Mode Structure:** You can visually separate the rapid (short-period) and slow (phugoid) motions.
-
----
-
-## 🧑‍💻 Example Input
-
-```text
-Select UAV (TB2, Anka, Aksungur, Karayel, Predator, Heron): TB2
-Simulation duration [s]: 60
-Number of elevator pulses: 1
- Pulse 1 start [s]: 5
- Pulse 1 duration [s]: 10
- Pulse 1 elevator [deg]: 2
+```
+UAV_flight_dynamics_simulator/
+├── UAV_flight_dynamics_simulator.py   # Main entry point for all simulations
+├── uav_sim/                           # Core simulation package
+│   ├── constants.py                   # Physics constants
+│   ├── quadcopter/                    # Quadcopter simulation modules
+│   │   ├── command_sim.py             # Interactive command-based simulator
+│   │   ├── controller.py              # PID controller implementation
+│   │   ├── dynamics.py                # Quadcopter physical dynamics
+│   │   ├── interactive_sim.py         # Interactive keyboard simulator
+│   │   ├── models.py                  # Quadcopter model parameters
+│   │   ├── run_simulation.py          # Simulation runner for quadcopters
+│   │   ├── simulate.py                # Simulation implementation
+│   │   ├── trajectory_sim.py          # Predefined trajectory simulation
+│   │   ├── visualize.py               # Visualization tools
+│   │   └── __init__.py
+│   ├── uav/                           # Fixed-wing simulation modules
+│   │   ├── dynamics.py                # Fixed-wing physical dynamics
+│   │   ├── models.py                  # Fixed-wing aircraft parameters
+│   │   ├── run_simulation.py          # Simulation runner for fixed-wing
+│   │   ├── simulate.py                # Fixed-wing simulation implementation
+│   │   ├── visualize.py               # Fixed-wing visualization tools
+│   │   └── __init__.py
+│   ├── utils/                         # Utility functions
+│   │   ├── common.py                  # Common utilities
+│   │   └── __init__.py
+│   └── __init__.py
+└── demo_script.txt                    # Example commands for the quadcopter simulator
 ```
 
-* This configuration applies a +2° elevator deflection from t=5s to t=15s, then holds trim.
-* Use this input to reproduce the sample plots above.
+## Running the Simulator
 
----
+### Command Line Interface
 
-## ⚙️ How to Use
-
-### 1. Install Requirements
+The simulator provides a unified command-line interface for all simulator types:
 
 ```bash
-pip install numpy matplotlib scipy
+# Fixed-wing simulator
+python UAV_flight_dynamics_simulator.py --fixed-wing --model TB2 --duration 60
+
+# Quadcopter command simulator (interactive)
+python UAV_flight_dynamics_simulator.py --quadcopter-command
+
+# Quadcopter trajectory simulator
+python UAV_flight_dynamics_simulator.py --quadcopter-trajectory --maneuver square --duration 30
 ```
 
-### 2. Run the Simulator
+### Interactive Menu
+
+Run without arguments to use the interactive menu:
 
 ```bash
 python UAV_flight_dynamics_simulator.py
 ```
 
-### 3. Follow Prompts
+## Available Models
 
-* Select UAV model (`TB2`, `Anka`, etc.)
-* Enter simulation duration (seconds)
-* Specify number and details of elevator input pulses (start time, duration, angle in deg)
+### Quadcopter Models
+- default: Standard quadcopter (0.5kg)
+- small: Lightweight quadcopter (0.3kg)
+- medium: Medium quadcopter (1.0kg)
+- large: Heavy quadcopter (2.0kg)
 
-### 4. Interpret Results
+### Fixed-wing Models
+- TB2: Bayraktar TB2 medium-altitude long-endurance UAV
+- Anka: TAI Anka reconnaissance UAV
+- Aksungur: High-altitude long-endurance UAV
+- Karayel: Tactical UAV
+- Predator: General Atomics MQ-1 Predator
+- Heron: IAI Heron surveillance UAV
 
-* Console output provides trim speed, eigenvalue/mode analysis (stability, damping).
-* Plots visualize time-domain dynamics and state evolution in 3D.
+## Maneuver Types (Quadcopter)
 
----
+- hover: Maintain position at specified height
+- square: Fly in a square pattern
+- figure8: Fly in a figure-8 pattern
+- yaw_test: Test yaw control
 
-## 🧮 How the Physics Is Modeled
+## Command Simulator
 
-* **Linearized equations:** Assumes small deviations from straight-and-level flight (“trim”)
-* **Only pitch and speed states modeled (4 DOF):** No roll/yaw or full 6-DOF yet.
-* **All parameters can be edited or improved as new data becomes available.**
+The command simulator allows direct control of motor speeds:
 
-**Mode analysis:**
-The code prints the system’s eigenvalues—these determine if the aircraft is stable and how fast it returns to trim (or diverges).
+```
+m1 5000    # Set motor 1 (Front-Right) to 5000 RPM
+m2 5000    # Set motor 2 (Front-Left) to 5000 RPM
+hover      # Set all motors to hover speed
+script demo_script.txt  # Run commands from script file
+```
 
-* *Phugoid*: Long, slow oscillation in speed/altitude
-* *Short-period*: Fast oscillation in pitch/α
+## Features
 
----
+- **Unified Command Interface**: Single entry point for all simulation modes
+- **Quadcopter Simulator**: Direct motor control with real-time visualization
+- **Fixed-Wing Simulator**: Study aircraft response to elevator inputs
+- **Multiple UAV Models**: Various pre-defined aircraft configurations
 
-## 📝 Reference Data and Assumptions
+## Project Organization
 
-* See [Bayraktar\_TB2\_sources.md](./Bayraktar_TB2_sources.md) for a detailed breakdown of the TB2’s aerodynamic model and parameter sources.
-* All other UAVs use similar methods, with “assumed” values marked in code and documentation.
+```
+UAV_flight_dynamics_simulator/
+├── uav_sim/                   # Main simulation package
+│   ├── quadcopter/            # Quadcopter simulation modules
+│   │   ├── command_sim.py     # Interactive command-based simulator
+│   │   ├── controller.py      # PID controller implementation
+│   │   ├── dynamics.py        # Quadcopter physical dynamics
+│   │   ├── models.py          # Quadcopter model parameters
+│   │   ├── run_simulation.py  # Entry point for quadcopter simulations
+│   │   ├── simulate.py        # Simulation components and trajectory generation
+│   │   ├── trajectory_sim.py  # Structured trajectory simulator
+│   │   └── visualize.py       # Visualization functions for quadcopter
+│   │
+│   ├── uav/                   # Fixed-wing simulation modules
+│   │   ├── dynamics.py        # Fixed-wing flight dynamics
+│   │   ├── models.py          # Fixed-wing aircraft parameters
+│   │   ├── run_simulation.py  # Entry point for fixed-wing simulations
+│   │   ├── simulate.py        # Flight simulation components
+│   │   └── visualize.py       # Visualization for fixed-wing simulations
+│   │
+│   └── utils/                 # Shared utility functions
+│       └── common.py          # Common utilities for both simulators
+│
+└── UAV_flight_dynamics_simulator.py  # Main entry point with unified CLI
+```
 
----
+## Installation
 
-## ⚠️ Limitations
+```bash
+# Clone the repository
+git clone https://github.com/yourusername/UAV_flight_dynamics_simulator.git
+cd UAV_flight_dynamics_simulator
 
-* No lateral/directional motion (roll/yaw)—longitudinal axis only.
-* Linear model: Nonlinear effects, large maneuvers, and actuator limits not included.
-* No atmospheric/altitude variation.
-* Not validated for flight-critical use—**for research, learning, and pre-design only.**
+# Create a virtual environment
+python -m venv .venv
 
----
+# Activate the virtual environment
+# On Windows:
+.\.venv\Scripts\activate
+# On Linux/Mac:
+# source .venv/bin/activate
 
-## 📚 References
+# Install dependencies
+pip install -r requirements.txt
+```
 
-* Marotta, Y. (2022). *Geometric modelling, stability and control analysis of the UAV Bayraktar TB-2 with OpenVSP.*
-* Marques, P., & Da Ronch, A. (2017). *Advanced UAV Aerodynamics, Flight Stability and Control.*
-* TRADOC (2021). *Design and Analysis of the Impact of Turkish UAVs.*
+## Understanding the Output
 
----
+### Quadcopter Visualization:
 
-## 👨‍💻 Author
+- **3D Trajectory**: Quadcopter's path in 3D space
+- **Position Plot**: X, Y, Z position over time
+- **Attitude Plot**: Roll, pitch, yaw angles in degrees
+- **Motor Speeds Plot**: Individual motor speeds in RPM with hover speed reference
 
-* Original version and idea by [Mattia Di Mauro](https://github.com/MattiaDiMauro/Longitudinal-Flight-Simulator)
-* UAV extension and documentation by Dağlar Duman
+### Fixed-Wing Visualization:
 
----
+- **Time Response**: Changes in forward speed, angle of attack, pitch rate, and pitch angle
+- **3D Trajectory**: Path in (α, q, θ) space (Angle of Attack, Pitch Rate, Pitch)
+- **Elevator Input**: Visualization of elevator deflection over time
 
-> **Feel free to fork, use, or extend! For questions, improvements, or issues—open an issue or PR on GitHub.**
+## Applications
+
+This simulator can be used for:
+
+1. **Education**: Learning flight dynamics principles
+2. **Research**: Testing control algorithms
+3. **Design**: Evaluating UAV configurations
+4. **Testing**: Verifying expected behavior
+5. **Analysis**: Understanding aircraft stability and response
+
+## Coming Soon
+
+- **Fixed-Wing UAV Simulator**: Support for fixed-wing aircraft models and dynamics
