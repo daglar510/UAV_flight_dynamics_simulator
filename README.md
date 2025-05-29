@@ -1,5 +1,3 @@
-Looking at both READMEs, I can create an improved version that combines the best aspects of both. The 0.1.0 branch README has excellent technical details about the simulator's physics and operation, while the 0.2.0 branch README has a more comprehensive structure and details about the new UI features. Here's a combined version:
-
 # UAV Flight Dynamics Simulator
 
 A comprehensive web-based application for simulating and analyzing the longitudinal flight dynamics of fixed-wing UAVs. This tool allows aerospace engineers, researchers, and students to study how elevator deflection affects UAV dynamic behavior through an intuitive interface.
