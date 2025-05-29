@@ -79,6 +79,7 @@ After simulation, you'll see:
 
 ### 1\. **Time-Domain Response (5 subplots)**
 
+<<<<<<< HEAD
 * **u**: Forward speed deviation \[m/s\] - Shows phugoid oscillation and the immediate response to elevator pulse.
 * **α**: Angle of attack (degrees) - Displays both short-period (fast, damped) and phugoid (slow, lightly damped) dynamics.
 * **q**: Pitch rate (degrees/sec) - Captures rapid changes in pitch due to elevator input and short-period mode.
@@ -121,6 +122,19 @@ matplotlib
 scipy
 plotly
 ```
+=======
+## Prerequisites
+
+- Python 3.8 or higher
+- Required Python packages:
+  ```
+  reflex>=0.7.8
+  numpy
+  matplotlib
+  scipy
+  plotly
+  ```
+>>>>>>> origin/0.2.0
 
 ### Installation
 
@@ -206,8 +220,14 @@ Contributions to improve the Flight Dynamics Simulator are welcome! Please feel 
 
 This project is licensed under the MIT License - see the LICENSE file for details.
 
+<<<<<<< HEAD
 ---
 
 > **Feel free to fork, use, or extend! For questions, improvements, or issues—open an issue or PR on GitHub.**
 
 - **If you wan to reach out**: [Email](mailto:daglarduman510@gmail.com)
+=======
+- **Email**: [Click Here](mailto:daglarduman510@gmail.com)
+
+Feel free to reach out for any questions or contributions! 
+>>>>>>> origin/0.2.0
