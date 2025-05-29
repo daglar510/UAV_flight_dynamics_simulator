@@ -1,5 +1,3 @@
-Looking at both READMEs, I can create an improved version that combines the best aspects of both. The 0.1.0 branch README has excellent technical details about the simulator's physics and operation, while the 0.2.0 branch README has a more comprehensive structure and details about the new UI features. Here's a combined version:
-
 # UAV Flight Dynamics Simulator
 
 A comprehensive web-based application for simulating and analyzing the longitudinal flight dynamics of fixed-wing UAVs. This tool allows aerospace engineers, researchers, and students to study how elevator deflection affects UAV dynamic behavior through an intuitive interface.
@@ -79,7 +77,6 @@ After simulation, you'll see:
 
 ### 1\. **Time-Domain Response (5 subplots)**
 
-<<<<<<< HEAD
 * **u**: Forward speed deviation \[m/s\] - Shows phugoid oscillation and the immediate response to elevator pulse.
 * **α**: Angle of attack (degrees) - Displays both short-period (fast, damped) and phugoid (slow, lightly damped) dynamics.
 * **q**: Pitch rate (degrees/sec) - Captures rapid changes in pitch due to elevator input and short-period mode.
@@ -110,20 +107,9 @@ After simulation, you'll see:
   * SciPy for ODE integration
   * Plotly for interactive data visualization
 
-## 🚀 Installation & Usage
+## Getting Started
 
 ### Prerequisites
-* Python 3.8 or higher
-* Required Python packages:
-```
-reflex>=0.7.8
-numpy
-matplotlib
-scipy
-plotly
-```
-=======
-## Prerequisites
 
 - Python 3.8 or higher
 - Required Python packages:
@@ -134,7 +120,6 @@ plotly
   scipy
   plotly
   ```
->>>>>>> origin/0.2.0
 
 ### Installation
 
@@ -220,14 +205,16 @@ Contributions to improve the Flight Dynamics Simulator are welcome! Please feel 
 
 This project is licensed under the MIT License - see the LICENSE file for details.
 
-<<<<<<< HEAD
----
+## Acknowledgments
 
-> **Feel free to fork, use, or extend! For questions, improvements, or issues—open an issue or PR on GitHub.**
+- Reflex framework for the reactive UI components
+- NumPy, SciPy, and Plotly for scientific computing and visualization
+- The aerospace engineering community for theoretical foundations 
 
-- **If you wan to reach out**: [Email](mailto:daglarduman510@gmail.com)
-=======
-- **Email**: [Click Here](mailto:daglarduman510@gmail.com)
+## Author and Creator
+
+This project was developed by Daglar Duman.
+
+- **Email**: [Your Email](mailto:daglarduman510@gmail.com)
 
 Feel free to reach out for any questions or contributions! 
->>>>>>> origin/0.2.0
