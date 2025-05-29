@@ -66,9 +66,7 @@ The simulator focuses on the longitudinal dynamics of fixed-wing aircraft, analy
   - SciPy for ODE integration
   - Plotly for interactive data visualization
 
-## Getting Started
-
-### Prerequisites
+## Prerequisites
 
 - Python 3.8 or higher
 - Required Python packages:
@@ -213,16 +211,6 @@ Contributions to improve the Flight Dynamics Simulator are welcome! Please feel 
 
 This project is licensed under the MIT License - see the LICENSE file for details.
 
-## Acknowledgments
-
-- Reflex framework for the reactive UI components
-- NumPy, SciPy, and Plotly for scientific computing and visualization
-- The aerospace engineering community for theoretical foundations 
-
-## Author and Creator
-
-This project was developed by Daglar Duman.
-
-- **Email**: [Your Email](mailto:daglarduman510@gmail.com)
+- **Email**: [Click Here](mailto:daglarduman510@gmail.com)
 
 Feel free to reach out for any questions or contributions! 
