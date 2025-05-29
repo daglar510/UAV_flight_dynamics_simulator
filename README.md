@@ -210,4 +210,4 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 > **Feel free to fork, use, or extend! For questions, improvements, or issues—open an issue or PR on GitHub.**
 
-- **If you wan to reach out**: [Email](mailto:daglarduman510@gmail.com)
+- **If you want to reach out**: [Email](mailto:daglarduman510@gmail.com)
