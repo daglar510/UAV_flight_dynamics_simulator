@@ -126,9 +126,13 @@ After 4DOF simulation, you'll see:
 * **θ**: Pitch angle (degrees)
 * **Elevator Input**: Commanded elevator angle (degrees)
 
+![4DOF Time Domain Plot](assets/4dof_2dplot.png)
+
 **2. 3D Trajectory in State-Space**
 * Visualizes the relationship between α, q, and θ
 * Helps identify dynamic coupling and stability patterns
+
+![4DOF 3D Trajectory](assets/4dof_3dplot.PNG)
 
 ### 6DOF Simulation Results
 
@@ -145,10 +149,14 @@ After 6DOF simulation, the visualization includes:
   * Energy components (kinetic, potential)
   * Position (x, y, z in NED frame)
 
+![6DOF Time Domain Plot](assets/6dof_2dplot.png)
+
 **2. 3D Trajectory Visualization**
 * Position trajectory (x, y, z)
 * Euler angle trajectory (φ, θ, ψ)
 * Shows the complete spatial motion of the UAV
+
+![6DOF 3D Trajectory](assets/6dof_3dplot.png)
 
 Each plot includes clear explanations of what the variable represents, making the results accessible to users with different levels of aerospace knowledge.
 
@@ -178,6 +186,72 @@ The application automatically evaluates stability through the damping ratio (ζ)
 * 0.02 < ζ < 0.2: Poorly damped
 * 0.2 < ζ < 0.7: Good aircraft response
 * ζ > 0.7: Heavily damped (potentially non-oscillatory)
+
+## 📋 Example Simulation Results
+
+### 4DOF Example
+
+**Input Configuration:**
+```
+Simulation Duration: 90 seconds
+
+Elevator Pulses:
+- Start: 10s, Duration: 10s, Angle: 2°
+- Start: 35s, Duration: 15s, Angle: -1°
+```
+
+**Results Summary:**
+```
+Trim Speed: U0 = 37.43 m/s (72.76 knots)
+
+Eigenvalue Analysis:
+- Short Period Mode: lambda = -0.9866+0.8354j | wn = 1.2928 rad/s | zeta = 0.763
+  --> Highly damped (probably not oscillatory)
+- Phugoid Mode: lambda = 0.0105+0.2110j | wn = 0.2112 rad/s | zeta = -0.050
+  --> UNSTABLE (Danger: positive real part!)
+```
+
+**Interpretation:**
+- The short period mode is well-damped, indicating good handling qualities for quick maneuvers
+- The phugoid mode shows slight instability (positive real part), which means the aircraft will gradually diverge from equilibrium in speed and pitch over long periods
+- The time domain response shows an initial pitch-up response to the 2° elevator input, followed by an oscillatory motion that gradually increases in amplitude due to the unstable phugoid
+
+### 6DOF Example
+
+**Input Configuration:**
+```
+Simulation Duration: 90 seconds
+
+Control Pulses:
+- Start: 10s, Duration: 10s, Roll: 2°, Pitch: 2°, Yaw: -3°, Throttle: 1
+- Start: 30s, Duration: 15s, Roll: -1°, Pitch: -1°, Yaw: 0°, Throttle: 1
+- Start: 60s, Duration: 10s, Roll: 0°, Pitch: 0°, Yaw: 2°, Throttle: 1
+```
+
+**Results Summary:**
+```
+Trim Speed: U0 = 37.43 m/s (72.76 knots)
+
+Eigenvalue Analysis:
+6DOF simulation: Eigen analysis not implemented.
+```
+
+**Interpretation of 6DOF Outputs:**
+- **The Time Domain Response plots** show 21 different variables to provide a comprehensive view of the aircraft's behavior:
+  - The top rows show the basic velocities (u, v, w) and how they respond to control inputs
+  - The angular rates (p, q, r) show the rotation speeds around each axis
+  - The Euler angles (roll, pitch, yaw) display the attitude of the aircraft
+  - Control inputs are shown alongside their corresponding responses (as dotted lines)
+  - Derived quantities like angle of attack (α), sideslip (β), and airspeed show aerodynamic conditions
+  - Energy metrics help understand the trade-offs between potential and kinetic energy
+  - Position coordinates (x, y, z) track the aircraft's path through space
+
+- **The 3D Trajectory plot** shows two important aspects:
+  - The blue line shows the physical path of the aircraft through space (x, y, z coordinates)
+  - The red dashed line shows how the attitude (roll, pitch, yaw angles) changes over time
+  - This visualization helps understand how control inputs affect both position and orientation
+
+The 6DOF simulation provides a much more complete picture of aircraft behavior than the 4DOF model, capturing cross-coupling effects between longitudinal and lateral-directional dynamics.
 
 ## ⚙️ Technical Implementation
 
