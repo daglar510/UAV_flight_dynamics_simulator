@@ -117,20 +117,71 @@ The control input system handles multiple overlapping pulses, calculating the co
 
 ### 4DOF Simulation Results
 
-After 4DOF simulation, you'll see:
+After a 4DOF simulation using the TB2 UAV model, you will see the following results and visualizations:
 
-**1. Time-Domain Response**
-* **u**: Forward speed deviation \[m/s\]
-* **α**: Angle of attack (degrees)
-* **q**: Pitch rate (degrees/sec)
-* **θ**: Pitch angle (degrees)
-* **Elevator Input**: Commanded elevator angle (degrees)
+*UAV Model Used: Karayel*
+
+**Input Configuration:**
+```markdown
+Simulation Duration: 90 seconds
+
+Elevator Pulses:
+- Start: 10s, Duration: 10s, Angle: 2°
+- Start: 35s, Duration: 15s, Angle: -1°
+```
+
+**Results Summary:**
+```markdown
+Trim Speed: U0 = 37.43 m/s (72.76 knots)
+
+Eigenvalue Analysis:
+- Short Period Mode: lambda = -0.9866+0.8354j | wn = 1.2928 rad/s | zeta = 0.763
+  --> Highly damped (probably not oscillatory)
+- Phugoid Mode: lambda = 0.0105+0.2110j | wn = 0.2112 rad/s | zeta = -0.050
+  --> UNSTABLE (Danger: positive real part!)
+```
+
+**Interpretation of 4DOF Outputs:**
+
+The 4DOF simulation models the aircraft's longitudinal motion using a linearized state-space system. The results are primarily presented as time-domain responses of the key state variables and the control input. These plots show how the aircraft's states evolve over time based on the integrated linearized equations of motion (ẋ = A·x + B·u), where **x** is the state vector `[u_p, α, q, θ]` and **u** is the input vector `[thrust, elevator]`. For the examples provided (using elevator pulses only), the thrust input component is considered zero.
+
+**1. Time-Domain Response Plots**
+
+These plots display the changes in the four state variables and the elevator input over the simulation duration:
+
+*   **u_p (m/s): Forward speed perturbation**: This variable represents the deviation of the aircraft's forward speed from the initial trim speed (U0). It is the first element of the state vector, \(x_0\). The rate of change of \(u_p\), denoted as \(\dot{u}_p\), is calculated from the first row of the state-space equation:
+    \[ \dot{u}_p = A_{11}u_p + A_{12}\alpha + A_{13}q + A_{14}\theta + B_{11}thrust + B_{12}elevator \]
+    The plot shows \(u_p(t) = x_0(t) \cdot U0\), representing the actual change in speed from the trim value in meters per second.
+
+*   **α (deg): Angle of attack**: The angle of attack is the angle between the aircraft's longitudinal axis and the direction of the airflow, projected onto the aircraft's vertical (x-z) plane. It is the second element of the state vector, \(x_1\). Its rate of change, \(\dot{\alpha}\), is computed from the second row of the state-space equation:
+    \[ \dot{\alpha} = A_{21}u_p + A_{22}\alpha + A_{23}q + A_{24}\theta + B_{21}thrust + B_{22}elevator \]
+    The plot shows the integrated angle of attack values, converted from radians to degrees.
+
+*   **q (deg/s): Pitch rate**: The pitch rate is the angular velocity of the aircraft about its lateral (pitch) axis (body y-axis). It is the third element of the state vector, \(x_2\). Its rate of change, \(\dot{q}\), is calculated from the third row of the state-space equation:
+    \[ \dot{q} = A_{31}u_p + A_{32}\alpha + A_{33}q + A_{34}\theta + B_{31}thrust + B_{32}elevator \]
+    The plot displays the integrated pitch rate values, converted from radians per second to degrees per second.
+
+*   **θ (deg): Pitch angle**: The pitch angle is the angle between the aircraft's longitudinal axis and the horizontal plane. It is the fourth element of the state vector, \(x_3\). In the linearized small-perturbation model, the rate of change of the pitch angle, \(\dot{\theta}\), is directly equal to the pitch rate, \(q\):
+    \[ \dot{\theta} = q \]
+    The plot shows the integrated pitch angle values, representing the change from the trim pitch angle, converted from radians to degrees.
+
+*   **Elevator (deg): Input**: This plot shows the time history of the commanded elevator deflection. This is the primary control input (\(u_1\)) used to influence the longitudinal dynamics in this simulation mode. Its values are directly taken from the user-defined pulse configuration and are plotted in degrees.
 
 ![4DOF Time Domain Plot](assets/4dof_2dplot.png)
 
-**2. 3D Trajectory in State-Space**
-* Visualizes the relationship between α, q, and θ
-* Helps identify dynamic coupling and stability patterns
+**Interpretation of 4DOF Example Results:**
+
+For the given elevator pulse inputs on the TB2 UAV, the simulation results show:
+- **Short Period Mode**: The eigenvalue analysis indicates a highly damped short period mode (ζ = 0.763). This is reflected in the time domain plots by the quick damping of initial oscillations in angle of attack (α) and pitch rate (q) following the elevator inputs. This suggests good handling qualities for rapid pitch maneuvers.
+- **Phugoid Mode**: The analysis reveals an unstable phugoid mode (ζ = -0.050). This positive real part of the eigenvalue means that oscillations in speed (u_p) and pitch angle (θ) will gradually grow in amplitude over time if not actively controlled. The time domain plots visually confirm this, showing oscillations in \(u_p\) and θ that increase in magnitude throughout the 90-second simulation.
+- **Overall Response**: The initial 2° elevator pulse at 10s causes a noticeable pitch-up (increase in θ) and angle of attack (α), with associated changes in pitch rate (q) and forward speed perturbation (u_p). The subsequent -1° pulse at 35s initiates a pitch-down response. The unstable phugoid is evident in the long-term divergent behavior of the speed and pitch angle.
+
+**2. 3D Trajectory Plot**
+
+This plot visualizes the aircraft's dynamic motion in a 3D state-space defined by three key longitudinal variables: Angle of Attack (α), Pitch Rate (q), and Pitch Angle (θ). Each point on the blue trajectory line represents the simultaneous values of `[α, q, θ]` at a specific moment in time during the simulation. The trajectory starts near the origin (representing the initial trim state of zero perturbations) and traces the path of the aircraft's attitude and pitch rate through this state space as it responds to control inputs and its inherent dynamics. The shape of the trajectory provides a qualitative understanding of the coupling between these states and the damping/stability of the longitudinal modes.
+
+*   **Axes:** α \[deg\] (angle of attack), q \[deg/s\] (pitch rate), θ \[deg\] (pitch angle). These axes directly correspond to the \(x_1\), \(x_2\), and \(x_3\) components of the integrated state vector from the simulation, with values converted to degrees for visualization.\
+*   **Trajectory:** The blue line plots the points \((\alpha(t), q(t), \theta(t))\) derived from the simulation's output state matrix (`y_vals[1]`, `y_vals[2]`, `y_vals[3]`) over time. For a stable system, this trajectory would spiral inward towards the origin; the outward spiraling or diverging path seen for this unstable phugoid example confirms the instability identified in the eigenvalue analysis.
 
 ![4DOF 3D Trajectory](assets/4dof_3dplot.PNG)
 
@@ -192,7 +243,7 @@ The application automatically evaluates stability through the damping ratio (ζ)
 ### 4DOF Example
 
 **Input Configuration:**
-```
+```markdown
 Simulation Duration: 90 seconds
 
 Elevator Pulses:
@@ -201,7 +252,7 @@ Elevator Pulses:
 ```
 
 **Results Summary:**
-```
+```markdown
 Trim Speed: U0 = 37.43 m/s (72.76 knots)
 
 Eigenvalue Analysis:
@@ -218,8 +269,10 @@ Eigenvalue Analysis:
 
 ### 6DOF Example
 
+*UAV Model Used: Karayel*
+
 **Input Configuration:**
-```
+```markdown
 Simulation Duration: 90 seconds
 
 Control Pulses:
@@ -229,7 +282,7 @@ Control Pulses:
 ```
 
 **Results Summary:**
-```
+```markdown
 Trim Speed: U0 = 37.43 m/s (72.76 knots)
 
 Eigenvalue Analysis:
@@ -237,19 +290,62 @@ Eigenvalue Analysis:
 ```
 
 **Interpretation of 6DOF Outputs:**
-- **The Time Domain Response plots** show 21 different variables to provide a comprehensive view of the aircraft's behavior:
-  - The top rows show the basic velocities (u, v, w) and how they respond to control inputs
-  - The angular rates (p, q, r) show the rotation speeds around each axis
-  - The Euler angles (roll, pitch, yaw) display the attitude of the aircraft
-  - Control inputs are shown alongside their corresponding responses (as dotted lines)
-  - Derived quantities like angle of attack (α), sideslip (β), and airspeed show aerodynamic conditions
-  - Energy metrics help understand the trade-offs between potential and kinetic energy
-  - Position coordinates (x, y, z) track the aircraft's path through space
+
+The 6DOF simulation provides a comprehensive view of the aircraft's full motion. The outputs include body-axis velocities and angular rates, Euler angles, derived aerodynamic angles (AoA, sideslip), airspeed, energy states, and inertial position.
+
+- **The Time Domain Response plots** show 21 different variables over time:
+
+  - **u (m/s): Forward speed**: The velocity component along the body's x-axis. Calculated from the integration of the x-axis equation of motion, which includes aerodynamic forces (like drag), thrust (from throttle), and rotational coupling terms (r*v - q*w).
+
+  - **v (m/s): Side speed**: The velocity component along the body's y-axis. Calculated from the integration of the y-axis equation of motion, influenced by side force (related to sideslip and control surface deflection) and rotational coupling (p*w - r*u).
+
+  - **w (m/s): Down speed**: The velocity component along the body's z-axis. Calculated from the integration of the z-axis equation of motion, affected by normal force (lift), gravity, and rotational coupling (q*u - p*v).
+
+  - **p (deg/s): Roll rate**: The angular velocity around the body's x-axis. Calculated from the integration of the roll moment equation, which depends on roll moment (L), moments of inertia (Ixx, Izz, Ixz), and products of inertia and angular rates.
+
+  - **q (deg/s): Pitch rate**: The angular velocity around the body's y-axis. Calculated from the integration of the pitch moment equation, primarily driven by the pitching moment (M) and the pitch moment of inertia (Iyy).
+
+  - **r (deg/s): Yaw rate**: The angular velocity around the body's z-axis. Calculated from the integration of the yaw moment equation, influenced by yaw moment (N), moments of inertia, and products of inertia and angular rates.
+
+  - **phi (deg): Roll angle**: The Euler angle representing rotation around the inertial x-axis (roll). Calculated by integrating the kinematic equation relating Euler angle rates to body angular rates (p, q, r) and other Euler angles (theta, psi).
+
+  - **theta (deg): Pitch angle**: The Euler angle representing rotation around the inertial y-axis (pitch). Calculated by integrating the kinematic equation involving body angular rates (q, r) and roll angle (phi).
+
+  - **psi (deg): Yaw angle**: The Euler angle representing rotation around the inertial z-axis (yaw). Calculated by integrating the kinematic equation involving body angular rates (q, r) and Euler angles (phi, theta).
+
+  - **Roll input (deg)**: The commanded roll control surface deflection (aileron) or equivalent input signal. This is an input to the simulation, defined by the user's pulse configuration.
+
+  - **Pitch input (deg)**: The commanded pitch control surface deflection (elevator) or equivalent input signal. This is an input to the simulation, defined by the user's pulse configuration.
+
+  - **Yaw input (deg)**: The commanded yaw control surface deflection (rudder) or equivalent input signal. This is an input to the simulation, defined by the user's pulse configuration.
+
+  - **Throttle (0-1)**: The commanded throttle setting (0 for idle, 1 for max thrust). This is an input to the simulation, defined by the user's pulse configuration.
+
+  - **Alpha (deg): AoA**: Angle of Attack, the angle between the body's x-axis and the velocity vector in the body's x-z plane. Calculated from body-axis velocities: α = arctan2(w, u).
+
+  - **Beta (deg): Sideslip**: The angle between the velocity vector and the body's x-axis in the body's x-y plane. Calculated from body-axis velocities and airspeed: β = arcsin(v / Airspeed).
+
+  - **Airspeed (m/s)**: The magnitude of the velocity vector in the body frame. Calculated as the square root of the sum of the squares of the body-axis velocities: Airspeed = sqrt(u² + v² + w²).
+
+  - **Kinetic E (J)**: Kinetic energy of the aircraft. Calculated as 0.5 * mass * Airspeed².
+
+  - **Potential E (J)**: Potential energy of the aircraft relative to a reference (sea level). Calculated as mass * gravity * (-z), where z is the downward position (so -z is altitude).
+
+  - **Altitude (m)**: The height of the aircraft above the reference plane. In the NED frame, this is simply the negative of the z position: Altitude = -z.
+
+  - **x (m): East**: The position coordinate in the East direction in the North-East-Down (NED) inertial frame. Calculated by integrating the Eastward velocity component, which is derived from the body-axis velocities rotated to the inertial frame using the Euler angles (phi, theta, psi).
+
+  - **y (m): North**: The position coordinate in the North direction in the NED inertial frame. Calculated by integrating the Northward velocity component, derived from body-axis velocities and Euler angles.
+
+  - **z (m): Down**: The position coordinate in the Down direction in the NED inertial frame. Calculated by integrating the Downward velocity component, derived from body-axis velocities and Euler angles.
+
+  Each plot shows how these variables change over the simulation duration. The overlaid dotted lines on the input plots (Roll, Pitch, Yaw) represent the corresponding body-axis angle responses (phi, theta, psi) for easy comparison of command vs. result.
 
 - **The 3D Trajectory plot** shows two important aspects:
-  - The blue line shows the physical path of the aircraft through space (x, y, z coordinates)
-  - The red dashed line shows how the attitude (roll, pitch, yaw angles) changes over time
-  - This visualization helps understand how control inputs affect both position and orientation
+  - The blue line shows the physical path of the aircraft through space (x, y, z coordinates in the NED frame). It visually represents the aircraft's movement over the ground.
+  - The red dashed line shows how the attitude (roll, pitch, yaw angles - phi, theta, psi) changes over time. This helps understand the aircraft's orientation during the flight path.
+
+  This visualization helps understand how control inputs affect both the aircraft's position and its orientation in 3D space, capturing the coupled nature of 6DOF flight.
 
 The 6DOF simulation provides a much more complete picture of aircraft behavior than the 4DOF model, capturing cross-coupling effects between longitudinal and lateral-directional dynamics.
 
@@ -273,7 +369,7 @@ The 6DOF simulation provides a much more complete picture of aircraft behavior t
 ### Prerequisites
 * Python 3.8 or higher
 * Required Python packages:
-```
+```markdown
 reflex>=0.7.8
 numpy
 scipy
