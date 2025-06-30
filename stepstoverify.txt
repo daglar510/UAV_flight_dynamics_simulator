@@ -1,0 +1,15 @@
+[ ] Units consistent in A & B matrices — flight_dynamics_simulator_ui_design/states/flight_sim_state.py — Stevens & Lewis
+[ ] Eigenvalue sign convention — flight_dynamics_simulator_ui_design/states/flight_sim_state.py — Etkin & Reid
+[ ] Solver tolerance appropriate for flight dynamics — flight_dynamics_simulator_ui_design/states/flight_sim_state.py — Hairer, Nørsett, Wanner
+[ ] Energy conservation in 6-DOF simulation — flight_dynamics_simulator_ui_design/states/flight_sim_state.py — Zipfel
+[ ] Plot integrity and correct labeling — flight_dynamics_simulator_ui_design/components/results_display.py — Best practices
+[ ] NaN/Inf guards during calculations — flight_dynamics_simulator_ui_design/states/flight_sim_state.py — Defensive programming
+[ ] Reference cross-checks for UAV parameters — flight_dynamics_simulator_ui_design/utils/uav_models.py — Publicly available data
+[ ] Regression test suggestions for key outputs — N/A — Software engineering best practices
+[ ] 4-DOF state-space matrix formulation correctness — flight_dynamics_simulator_ui_design/states/flight_sim_state.py — Stevens & Lewis
+[✔] 6-DOF equations of motion correctness — flight_dynamics_simulator_ui_design/states/flight_sim_state.py — Etkin & Reid
+[ ] Trim condition calculation verification — flight_dynamics_simulator_ui_design/states/flight_sim_state.py — Cook, Flight Dynamics Principles
+[ ] Small-angle assumption checks in 4-DOF — flight_dynamics_simulator_ui_design/states/flight_sim_state.py — Flight dynamics textbooks
+[ ] Correctness of quaternion or Euler angle kinematics in 6-DOF — flight_dynamics_simulator_ui_design/states/flight_sim_state.py — Stevens & Lewis
+[ ] Handling of overlapping control pulses — flight_dynamics_simulator_ui_design/states/flight_sim_state.py — Control theory
+[✔] Inertial-to-body frame transformations — flight_dynamics_simulator_ui_design/states/flight_sim_state.py — Beard & McLain 

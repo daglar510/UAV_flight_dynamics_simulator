@@ -473,8 +473,48 @@ class FlightSimState(rx.State):
             "Cnb": uav_p["Cnb"], "Cnp": uav_p["Cnp"], "Cnr": uav_p["Cnr"], "Cnda": uav_p["Cnda"], "Cndr": uav_p["Cndr"],
         }, U0
 
+    # ---------------------------------------------------------------------
+    # Trim solver for 6-DOF longitudinal equilibrium (level, wings-level)
+    # Solves for angle-of-attack (alpha) and elevator deflection (de) such
+    # that vertical force and pitching moment are zero.
+    # ---------------------------------------------------------------------
+    def _compute_trim_6dof(self, params: dict):
+        """Return alpha_trim (rad) and elevator deflection trim (rad)."""
+        q_bar = params["q_bar"]
+        S = params["S"]
+        c = params["c"]
+        m = params["m"]
+        g = C.G
+
+        # Aerodynamic derivatives
+        CL0 = params["CL_0"]
+        CL_alpha = params["CL_alpha"]
+        CL_de = params["CL_deltae"]
+        Cm0 = params["Cm_0"]
+        Cm_alpha = params["Cm_alpha"]
+        Cm_de = params["Cm_deltae"]
+
+        # Required lift coefficient for level flight
+        CL_trim_required = m * g / (q_bar * S)
+
+        # Linear system:  [CL_alpha  CL_de ] [alpha] = CL_trim_required - CL0
+        #                 [Cm_alpha  Cm_de] [de   ] = -Cm0
+        A = np.array([[CL_alpha, CL_de], [Cm_alpha, Cm_de]])
+        b = np.array([CL_trim_required - CL0, -Cm0])
+        try:
+            alpha_trim, de_trim = np.linalg.solve(A, b)
+        except np.linalg.LinAlgError:
+            # Fallback: zero elevator, compute alpha only
+            alpha_trim = (CL_trim_required - CL0) / (CL_alpha if CL_alpha != 0 else 1.0)
+            de_trim = 0.0
+        return alpha_trim, de_trim
+
     def _simulate_response_6dof(self, params: dict, pulses_input: List[PulseData], duration: float):
         # State: [u, v, w, p, q, r, phi, theta, psi]
+
+        # Compute trimmed initial conditions
+        alpha_trim, de_trim = self._compute_trim_6dof(params)
+
         t_eval = np.linspace(0, duration, 500)
         m, S, c, b = params["m"], params["S"], params["c"], params["b"]
         Ixx, Iyy, Izz, Ixz = params["Ixx"], params["Iyy"], params["Izz"], params["Ixz"]
@@ -483,41 +523,90 @@ class FlightSimState(rx.State):
         g = C.G
         # Helper: get control input at time t
         def get_controls(t):
-            roll = pitch = yaw = 0.0
+            roll_cmd = pitch_cmd = yaw_cmd = 0.0  # command increments (rad)
             throttle_sum = 0.0
             count = 0
             for p in pulses_input:
                 if p["start_time"] <= t <= p["start_time"] + p["duration"]:
-                    roll += np.deg2rad(p.get("roll_deg", 0.0))
-                    pitch += np.deg2rad(p.get("angle_deg", 0.0))
-                    yaw += np.deg2rad(p.get("yaw_deg", 0.0))
+                    roll_cmd += np.deg2rad(p.get("roll_deg", 0.0))
+                    # Positive "angle_deg" means pilot pulls BACK -> elevator UP (negative deflection)
+                    pitch_cmd += -np.deg2rad(p.get("angle_deg", 0.0))
+                    yaw_cmd += np.deg2rad(p.get("yaw_deg", 0.0))
                     throttle_sum += p.get("throttle", 1.0)
                     count += 1
-            if count > 0:
-                throttle = throttle_sum / count
-            else:
-                throttle = 1.0
-            return (roll, pitch, yaw, throttle)
+            throttle = throttle_sum / count if count > 0 else 1.0
+            return (roll_cmd, pitch_cmd, yaw_cmd, throttle)
         # ODE function
         def f_ode(t, y):
             u, v, w, p, q, r, phi, theta, psi, x, y_pos, z = y
-            da, de, dr, throttle = get_controls(t)
-            # Aerodynamic forces and moments (linearized, small angle)
-            CL = params["CL_0"] + params["CL_alpha"] * theta + params["CL_q"] * q * c / (2 * U0) + params["CL_deltae"] * de
-            CD = params["CD_0"] + params["CD_alpha"] * theta + params["CD_q"] * q * c / (2 * U0) + params["CD_deltae"] * de
-            Cm = params["Cm_0"] + params["Cm_alpha"] * theta + params["Cm_q"] * q * c / (2 * U0) + params["Cm_deltae"] * de
+            da_cmd, de_cmd, dr_cmd, throttle = get_controls(t)
+            # Total surface deflections = trim + command increments
+            de = de_trim + de_cmd
+            da = da_cmd
+            dr = dr_cmd
+
+            # Instantaneous angle-of-attack (rad)
+            alpha_inst = np.arctan2(w, u)
+
+            # Updated aerodynamic coefficients (depend on alpha, not theta)
+            CL = (
+                params["CL_0"]
+                + params["CL_alpha"] * alpha_inst
+                + params["CL_q"] * q * c / (2 * U0)
+                + params["CL_deltae"] * de
+            )
+            CD = (
+                params["CD_0"]
+                + params["CD_alpha"] * alpha_inst
+                + params["CD_q"] * q * c / (2 * U0)
+                + params["CD_deltae"] * de
+            )
+            Cm = (
+                params["Cm_0"]
+                + params["Cm_alpha"] * alpha_inst
+                + params["Cm_q"] * q * c / (2 * U0)
+                + params["Cm_deltae"] * de
+            )
             CY = params["CYb"] * v / U0 + params["CYp"] * p * b / (2 * U0) + params["CYr"] * r * b / (2 * U0) + params["CYda"] * da + params["CYdr"] * dr
             Cl = params["Clb"] * v / U0 + params["Clp"] * p * b / (2 * U0) + params["Clr"] * r * b / (2 * U0) + params["Clda"] * da + params["Cldr"] * dr
             Cn = params["Cnb"] * v / U0 + params["Cnp"] * p * b / (2 * U0) + params["Cnr"] * r * b / (2 * U0) + params["Cnda"] * da + params["Cndr"] * dr
-            X = -q_bar * S * CD + throttle * 100.0
-            Y = q_bar * S * CY
-            Z = -q_bar * S * CL
-            L = q_bar * S * b * Cl
-            M = q_bar * S * c * Cm
-            N = q_bar * S * b * Cn
-            u_dot = r * v - q * w + X / m
-            v_dot = p * w - r * u + Y / m
-            w_dot = q * u - p * v + Z / m
+            # Dynamic pressure with speed cap to avoid numerical blow-up
+            V_true = np.sqrt(u * u + v * v + w * w)
+            V_capped = np.clip(V_true, 1.0, 150.0)  # 150 m/s ≈ 540 km/h
+            q_bar_dyn = 0.5 * params["rho"] * V_capped * V_capped
+
+            # Aerodynamic and propulsion forces in body axes (use capped q_bar)
+            X = -q_bar_dyn * S * CD + throttle * 100.0
+            Y = q_bar_dyn * S * CY
+            Z = -q_bar_dyn * S * CL
+
+            # Pre-compute trigonometric terms for gravity transformation
+            sphi = np.sin(phi)
+            cphi = np.cos(phi)
+            sthe = np.sin(theta)
+            cthe = np.cos(theta)
+
+            # Gravity components expressed in body frame (positive z points down)
+            # Reference: Stevens & Lewis, Eq. 1.5-13
+            Xg = -m * g * sthe
+            Yg = m * g * sphi * cthe
+            Zg = m * g * cphi * cthe
+
+            # Total forces (aero + thrust + gravity)
+            X_tot = X + Xg
+            Y_tot = Y + Yg
+            Z_tot = Z + Zg
+
+            # Moments remain unchanged (about body axes)
+            L = q_bar_dyn * S * b * Cl
+            M = q_bar_dyn * S * c * Cm
+            N = q_bar_dyn * S * b * Cn
+
+            # Translational equations of motion (body axes)
+            # Positive directions: x-forward, y-right, z-down
+            u_dot = r * v - q * w + X_tot / m
+            v_dot = p * w - r * u + Y_tot / m
+            w_dot = q * u - p * v + Z_tot / m
             denom = Ixx * Izz - Ixz ** 2
             p_dot = (Izz * L + Ixz * N - (Ixz * (Iyy - Ixx - Izz) * p * r + (Ixz ** 2 + Izz * (Izz - Iyy)) * q * r)) / denom
             q_dot = (M / Iyy)
@@ -539,21 +628,44 @@ class FlightSimState(rx.State):
             vel_inertial = R @ vel_body
             x_dot, y_dot, z_dot = vel_inertial
             return [u_dot, v_dot, w_dot, p_dot, q_dot, r_dot, phi_dot, theta_dot, psi_dot, x_dot, y_dot, z_dot]
-        y0 = np.zeros(12)  # [u, v, w, p, q, r, phi, theta, psi, x, y, z]
-        sol = solve_ivp(f_ode, [0, duration], y0, t_eval=t_eval, rtol=1e-6, atol=1e-6)
+        # Initial state vector at trim
+        u0_body = U0 * np.cos(alpha_trim)
+        w0_body = U0 * np.sin(alpha_trim)
+        y0 = np.array(
+            [
+                u0_body,  # u
+                0.0,      # v
+                w0_body,  # w
+                0.0, 0.0, 0.0,  # p q r
+                0.0,           # phi
+                alpha_trim,    # theta ~ alpha for small angles
+                0.0,           # psi
+                0.0, 0.0, 0.0,  # x y z initial pos
+            ]
+        )
+        sol = solve_ivp(
+            f_ode,
+            [0, duration],
+            y0,
+            t_eval=t_eval,
+            rtol=1e-6,
+            atol=1e-6,
+            max_step=0.1,
+        )
         da_hist, de_hist, dr_hist, throttle_hist = [], [], [], []
         for tt in sol.t:
-            da, de, dr, th = get_controls(tt)
-            da_hist.append(np.rad2deg(da))
-            de_hist.append(np.rad2deg(de))
-            dr_hist.append(np.rad2deg(dr))
+            da_cmd, de_cmd, dr_cmd, th = get_controls(tt)
+            da_hist.append(np.rad2deg(da_cmd))
+            de_hist.append(np.rad2deg(de_cmd))
+            dr_hist.append(np.rad2deg(dr_cmd))
             throttle_hist.append(th)
         # Calculate derived quantities
         u, v, w = sol.y[0], sol.y[1], sol.y[2]
         x, y_pos, z = sol.y[9], sol.y[10], sol.y[11]
         alpha = np.degrees(np.arctan2(w, u))
         airspeed = np.sqrt(u**2 + v**2 + w**2)
-        beta = np.degrees(np.arcsin(np.clip(v / np.maximum(airspeed, 1e-6), -1, 1)))
+        airspeed_safe = np.maximum(airspeed, 1e-3)
+        beta = np.degrees(np.arcsin(np.clip(v / airspeed_safe, -1.0, 1.0)))
         kinetic = 0.5 * m * airspeed**2
         potential = m * g * (-z)  # NED: z down
         return sol.t, sol.y, np.array(da_hist), np.array(de_hist), np.array(dr_hist), np.array(throttle_hist), x, y_pos, z, alpha, beta, airspeed, kinetic, potential
@@ -608,7 +720,7 @@ class FlightSimState(rx.State):
         fig = make_subplots(
             rows=21, cols=1,
             subplot_titles=plot_titles,
-            vertical_spacing=0.04,
+            vertical_spacing=0.02,
         )
         fig.add_trace(go.Scatter(x=t_vals, y=y_vals[0], name="u"), row=1, col=1)
         fig.add_trace(go.Scatter(x=t_vals, y=y_vals[1], name="v"), row=2, col=1)
@@ -635,28 +747,23 @@ class FlightSimState(rx.State):
         fig.add_trace(go.Scatter(x=t_vals, y=np.degrees(y_vals[6]), name="Roll response", line=dict(dash='dot')), row=10, col=1)
         fig.add_trace(go.Scatter(x=t_vals, y=np.degrees(y_vals[7]), name="Pitch response", line=dict(dash='dot')), row=11, col=1)
         fig.add_trace(go.Scatter(x=t_vals, y=np.degrees(y_vals[8]), name="Yaw response", line=dict(dash='dot')), row=12, col=1)
-        # Add simple explanation annotation above each plot
-        for i, explanation in enumerate(plot_explanations):
+        # Explanatory annotations placed outside the plotting area (right side)
+        for idx, explanation in enumerate(plot_explanations, start=1):
             fig.add_annotation(
                 text=explanation,
-                xref="paper", yref="paper",
-                x=0, y=1 - (i * 1.0 / 21),
+                xref="paper",
+                yref="paper",
+                x=1.02,  # outside right margin
+                y=1 - (idx - 0.5) / 21.0,
                 showarrow=False,
-                font=dict(size=15, color="#333"),
+                font=dict(size=11, color="#444"),
                 align="left",
-                xanchor="left",
-                yanchor="top",
-                bgcolor="#f8f8f8",
-                bordercolor="#cccccc",
-                borderwidth=1,
-                opacity=0.85,
             )
         fig.update_layout(
             title_text=f"{uav_name} 6DOF Time Domain Response",
-            height=4000,
+            height=6000,
             showlegend=True,
-            margin=dict(t=120, b=40, l=80, r=80),
-            annotations=fig.layout.annotations,
+            margin=dict(t=120, b=40, l=80, r=160),
         )
         fig.update_xaxes(title_text="Time (s)")
         fig.update_yaxes(title_font=dict(size=14))
@@ -668,24 +775,24 @@ class FlightSimState(rx.State):
                 go.Scatter3d(
                     x=x,
                     y=y_pos,
-                    z=-z,  # Upwards
+                    z=-z,  # Upwards (negative NED becomes altitude)
                     mode="lines",
                     name="Position Trajectory",
-                    line=dict(color="blue", width=2),
+                    line=dict(color="blue", width=3),
                 ),
                 go.Scatter3d(
-                    x=np.degrees(y_vals[6]),
-                    y=np.degrees(y_vals[7]),
-                    z=np.degrees(y_vals[8]),
-                    mode="lines",
-                    name="Euler Angles (phi, theta, psi)",
-                    line=dict(color="red", width=2, dash="dash"),
-                )
+                    x=[x[0]],
+                    y=[y_pos[0]],
+                    z=[-z[0]],
+                    mode="markers",
+                    name="Start",
+                    marker=dict(color="red", size=6, symbol="circle"),
+                ),
             ]
         )
         fig.update_layout(
             height=700,
-            title=f"{uav_name} 6DOF Trajectory: Position (x, y, z) and Attitude (phi, theta, psi)",
+            title=f"{uav_name} 6DOF Position Trajectory",
             scene=dict(
                 xaxis_title="x (East, m)",
                 yaxis_title="y (North, m)",
@@ -754,11 +861,8 @@ class FlightSimState(rx.State):
                     self.is_simulating = False
                 yield rx.toast.success("6DOF Simulation Complete!")
         except Exception as e:
+            yield rx.toast.error(f"Simulation Error: {e}")
+            print(f"Simulation Error: {type(e).__name__} - {e}")
+        finally:
             async with self:
                 self.is_simulating = False
-            yield rx.toast.error(
-                f"Simulation Error: {str(e)}"
-            )
-            print(
-                f"Simulation Error: {type(e).__name__} - {e}"
-            )
