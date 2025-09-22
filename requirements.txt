@@ -4,3 +4,4 @@ numpy
 matplotlib
 scipy
 plotly
+python-flightgear>=1.0.0

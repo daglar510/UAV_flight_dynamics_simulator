@@ -34,10 +34,10 @@ A comprehensive web-based application for simulating and analyzing the flight dy
 The 4DOF simulator models longitudinal motion using a linearized state-space system:
 
 * **State Vector:** `[u, α, q, θ]`  
-   * `u` — Forward speed deviation \[m/s\]  
-   * `α` — Angle of attack \[radians\]  
-   * `q` — Pitch rate \[radians/sec\]  
-   * `θ` — Pitch angle \[radians\]
+   * `u` — Forward speed deviation [m/s]  
+   * `α` — Angle of attack [radians]  
+   * `q` — Pitch rate [radians/sec]  
+   * `θ` — Pitch angle [radians]
 * **Input Vector:** `[thrust, elevator deflection]`  
 * **System Equation:** ẋ = **A**·x + **B**·u
 
@@ -52,10 +52,10 @@ The A and B matrices are computed from aerodynamic and inertial properties, incl
 The 6DOF simulator implements full aircraft dynamics with:
 
 * **State Vector:** `[u, v, w, p, q, r, φ, θ, ψ, x, y, z]`
-   * `u, v, w` — Body-axis velocities \[m/s\]
-   * `p, q, r` — Body-axis angular rates \[rad/s\]
-   * `φ, θ, ψ` — Euler angles (roll, pitch, yaw) \[rad\]
-   * `x, y, z` — NED position coordinates \[m\]
+   * `u, v, w` — Body-axis velocities [m/s]
+   * `p, q, r` — Body-axis angular rates [rad/s]
+   * `φ, θ, ψ` — Euler angles (roll, pitch, yaw) [rad]
+   * `x, y, z` — NED position coordinates [m]
 * **Input Vector:** `[roll, pitch, yaw, throttle]`
 * **Additional Parameters Required:**
    * Moments of inertia (Ixx, Iyy, Izz, Ixz)
@@ -143,17 +143,17 @@ Eigenvalue Analysis:
 
 **Interpretation of 4DOF Outputs:**
 
-The 4DOF simulation models the aircraft's longitudinal motion using a linearized state-space system. The results are primarily presented as time-domain responses of the key state variables and the control input. These plots show how the aircraft's states evolve over time based on the integrated linearized equations of motion (ẋ = A·x + B·u), where **x** is the state vector `[u_p, α, q, θ]` and **u** is the input vector `[thrust, elevator]`. For the examples provided (using elevator pulses only), the thrust input component is considered zero.
+The 4DOF simulation models the aircraft\'s longitudinal motion using a linearized state-space system. The results are primarily presented as time-domain responses of the key state variables and the control input. These plots show how the aircraft\'s states evolve over time based on the integrated linearized equations of motion (ẋ = A·x + B·u), where **x** is the state vector `[u_p, α, q, θ]` and **u** is the input vector `[thrust, elevator]`. For the examples provided (using elevator pulses only), the thrust input component is considered zero.
 
 **1. Time-Domain Response Plots**
 
 These plots display the changes in the four state variables and the elevator input over the simulation duration:
 
-*   **u_p (m/s): Forward speed perturbation**: This variable represents the deviation of the aircraft's forward speed from the initial trim speed (U0). It is the first element of the state vector, \(x_0\). The rate of change of \(u_p\), denoted as \(\dot{u}_p\), is calculated from the first row of the state-space equation:
+*   **u_p (m/s): Forward speed perturbation**: This variable represents the deviation of the aircraft\'s forward speed from the initial trim speed (U0). It is the first element of the state vector, \(x_0\). The rate of change of \(u_p\), denoted as \(\dot{u}_p\), is calculated from the first row of the state-space equation:
     \[ \dot{u}_p = A_{11}u_p + A_{12}\alpha + A_{13}q + A_{14}\theta + B_{11}thrust + B_{12}elevator \]
     The plot shows \(u_p(t) = x_0(t) \cdot U0\), representing the actual change in speed from the trim value in meters per second.
 
-*   **α (deg): Angle of attack**: The angle of attack is the angle between the aircraft's longitudinal axis and the direction of the airflow, projected onto the aircraft's vertical (x-z) plane. It is the second element of the state vector, \(x_1\). Its rate of change, \(\dot{\alpha}\), is computed from the second row of the state-space equation:
+*   **α (deg): Angle of attack**: The angle of attack is the angle between the aircraft\'s longitudinal axis and the direction of the airflow, projected onto the aircraft\'s vertical (x-z) plane. It is the second element of the state vector, \(x_1\). Its rate of change, \(\dot{\alpha}\), is computed from the second row of the state-space equation:
     \[ \dot{\alpha} = A_{21}u_p + A_{22}\alpha + A_{23}q + A_{24}\theta + B_{21}thrust + B_{22}elevator \]
     The plot shows the integrated angle of attack values, converted from radians to degrees.
 
@@ -161,7 +161,7 @@ These plots display the changes in the four state variables and the elevator inp
     \[ \dot{q} = A_{31}u_p + A_{32}\alpha + A_{33}q + A_{34}\theta + B_{31}thrust + B_{32}elevator \]
     The plot displays the integrated pitch rate values, converted from radians per second to degrees per second.
 
-*   **θ (deg): Pitch angle**: The pitch angle is the angle between the aircraft's longitudinal axis and the horizontal plane. It is the fourth element of the state vector, \(x_3\). In the linearized small-perturbation model, the rate of change of the pitch angle, \(\dot{\theta}\), is directly equal to the pitch rate, \(q\):
+*   **θ (deg): Pitch angle**: The pitch angle is the angle between the aircraft\'s longitudinal axis and the horizontal plane. It is the fourth element of the state vector, \(x_3\). In the linearized small-perturbation model, the rate of change of the pitch angle, \(\dot{\theta}\), is directly equal to the pitch rate, \(q\):
     \[ \dot{\theta} = q \]
     The plot shows the integrated pitch angle values, representing the change from the trim pitch angle, converted from radians to degrees.
 
@@ -178,10 +178,10 @@ For the given elevator pulse inputs on the TB2 UAV, the simulation results show:
 
 **2. 3D Trajectory Plot**
 
-This plot visualizes the aircraft's dynamic motion in a 3D state-space defined by three key longitudinal variables: Angle of Attack (α), Pitch Rate (q), and Pitch Angle (θ). Each point on the blue trajectory line represents the simultaneous values of `[α, q, θ]` at a specific moment in time during the simulation. The trajectory starts near the origin (representing the initial trim state of zero perturbations) and traces the path of the aircraft's attitude and pitch rate through this state space as it responds to control inputs and its inherent dynamics. The shape of the trajectory provides a qualitative understanding of the coupling between these states and the damping/stability of the longitudinal modes.
+This plot visualizes the aircraft\'s dynamic motion in a 3D state-space defined by three key longitudinal variables: Angle of Attack (α), Pitch Rate (q), and Pitch Angle (θ). Each point on the blue trajectory line represents the simultaneous values of `[α, q, θ]` at a specific moment in time during the simulation. The trajectory starts near the origin (representing the initial trim state of zero perturbations) and traces the path of the aircraft\'s attitude and pitch rate through this state space as it responds to control inputs and its inherent dynamics. The shape of the trajectory provides a qualitative understanding of the coupling between these states and the damping/stability of the longitudinal modes.
 
-*   **Axes:** α \[deg\] (angle of attack), q \[deg/s\] (pitch rate), θ \[deg\] (pitch angle). These axes directly correspond to the \(x_1\), \(x_2\), and \(x_3\) components of the integrated state vector from the simulation, with values converted to degrees for visualization.\
-*   **Trajectory:** The blue line plots the points \((\alpha(t), q(t), \theta(t))\) derived from the simulation's output state matrix (`y_vals[1]`, `y_vals[2]`, `y_vals[3]`) over time. For a stable system, this trajectory would spiral inward towards the origin; the outward spiraling or diverging path seen for this unstable phugoid example confirms the instability identified in the eigenvalue analysis.
+*   **Axes:** α [deg] (angle of attack), q [deg/s] (pitch rate), θ [deg] (pitch angle). These axes directly correspond to the \(x_1\), \(x_2\), and \(x_3\) components of the integrated state vector from the simulation, with values converted to degrees for visualization.
+*   **Trajectory:** The blue line plots the points \((\alpha(t), q(t), \theta(t))\) derived from the simulation\'s output state matrix (`y_vals[1]`, `y_vals[2]`, `y_vals[3]`) over time. For a stable system, this trajectory would spiral inward towards the origin; the outward spiraling or diverging path seen for this unstable phugoid example confirms the instability identified in the eigenvalue analysis.
 
 ![4DOF 3D Trajectory](assets/4dof_3dplot.PNG)
 
@@ -291,21 +291,21 @@ Eigenvalue Analysis:
 
 **Interpretation of 6DOF Outputs:**
 
-The 6DOF simulation provides a comprehensive view of the aircraft's full motion. The outputs include body-axis velocities and angular rates, Euler angles, derived aerodynamic angles (AoA, sideslip), airspeed, energy states, and inertial position.
+The 6DOF simulation provides a comprehensive view of the aircraft\'s full motion. The outputs include body-axis velocities and angular rates, Euler angles, derived aerodynamic angles (AoA, sideslip), airspeed, energy states, and inertial position.
 
 - **The Time Domain Response plots** show 21 different variables over time:
 
-  - **u (m/s): Forward speed**: The velocity component along the body's x-axis. Calculated from the integration of the x-axis equation of motion, which includes aerodynamic forces (like drag), thrust (from throttle), and rotational coupling terms (r*v - q*w).
+  - **u (m/s): Forward speed**: The velocity component along the body\'s x-axis. Calculated from the integration of the x-axis equation of motion, which includes aerodynamic forces (like drag), thrust (from throttle), and rotational coupling terms (r*v - q*w).
 
-  - **v (m/s): Side speed**: The velocity component along the body's y-axis. Calculated from the integration of the y-axis equation of motion, influenced by side force (related to sideslip and control surface deflection) and rotational coupling (p*w - r*u).
+  - **v (m/s): Side speed**: The velocity component along the body\'s y-axis. Calculated from the integration of the y-axis equation of motion, influenced by side force (related to sideslip and control surface deflection) and rotational coupling (p*w - r*u).
 
-  - **w (m/s): Down speed**: The velocity component along the body's z-axis. Calculated from the integration of the z-axis equation of motion, affected by normal force (lift), gravity, and rotational coupling (q*u - p*v).
+  - **w (m/s): Down speed**: The velocity component along the body\'s z-axis. Calculated from the integration of the z-axis equation of motion, affected by normal force (lift), gravity, and rotational coupling (q*u - p*v).
 
-  - **p (deg/s): Roll rate**: The angular velocity around the body's x-axis. Calculated from the integration of the roll moment equation, which depends on roll moment (L), moments of inertia (Ixx, Izz, Ixz), and products of inertia and angular rates.
+  - **p (deg/s): Roll rate**: The angular velocity around the body\'s x-axis. Calculated from the integration of the roll moment equation, which depends on roll moment (L), moments of inertia (Ixx, Izz, Ixz), and products of inertia and angular rates.
 
-  - **q (deg/s): Pitch rate**: The angular velocity around the body's y-axis. Calculated from the integration of the pitch moment equation, primarily driven by the pitching moment (M) and the pitch moment of inertia (Iyy).
+  - **q (deg/s): Pitch rate**: The angular velocity around the body\'s y-axis. Calculated from the integration of the pitch moment equation, primarily driven by the pitching moment (M) and the pitch moment of inertia (Iyy).
 
-  - **r (deg/s): Yaw rate**: The angular velocity around the body's z-axis. Calculated from the integration of the yaw moment equation, influenced by yaw moment (N), moments of inertia, and products of inertia and angular rates.
+  - **r (deg/s): Yaw rate**: The angular velocity around the body\'s z-axis. Calculated from the integration of the yaw moment equation, influenced by yaw moment (N), moments of inertia, and products of inertia and angular rates.
 
   - **phi (deg): Roll angle**: The Euler angle representing rotation around the inertial x-axis (roll). Calculated by integrating the kinematic equation relating Euler angle rates to body angular rates (p, q, r) and other Euler angles (theta, psi).
 
@@ -313,17 +313,17 @@ The 6DOF simulation provides a comprehensive view of the aircraft's full motion.
 
   - **psi (deg): Yaw angle**: The Euler angle representing rotation around the inertial z-axis (yaw). Calculated by integrating the kinematic equation involving body angular rates (q, r) and Euler angles (phi, theta).
 
-  - **Roll input (deg)**: The commanded roll control surface deflection (aileron) or equivalent input signal. This is an input to the simulation, defined by the user's pulse configuration.
+  - **Roll input (deg)**: The commanded roll control surface deflection (aileron) or equivalent input signal. This is an input to the simulation, defined by the user\'s pulse configuration.
 
-  - **Pitch input (deg)**: The commanded pitch control surface deflection (elevator) or equivalent input signal. This is an input to the simulation, defined by the user's pulse configuration.
+  - **Pitch input (deg)**: The commanded pitch control surface deflection (elevator) or equivalent input signal. This is an input to the simulation, defined by the user\'s pulse configuration.
 
-  - **Yaw input (deg)**: The commanded yaw control surface deflection (rudder) or equivalent input signal. This is an input to the simulation, defined by the user's pulse configuration.
+  - **Yaw input (deg)**: The commanded yaw control surface deflection (rudder) or equivalent input signal. This is an input to the simulation, defined by the user\'s pulse configuration.
 
-  - **Throttle (0-1)**: The commanded throttle setting (0 for idle, 1 for max thrust). This is an input to the simulation, defined by the user's pulse configuration.
+  - **Throttle (0-1)**: The commanded throttle setting (0 for idle, 1 for max thrust). This is an input to the simulation, defined by the user\'s pulse configuration.
 
-  - **Alpha (deg): AoA**: Angle of Attack, the angle between the body's x-axis and the velocity vector in the body's x-z plane. Calculated from body-axis velocities: α = arctan2(w, u).
+  - **Alpha (deg): AoA**: Angle of Attack, the angle between the body\'s x-axis and the velocity vector in the body\'s x-z plane. Calculated from body-axis velocities: α = arctan2(w, u).
 
-  - **Beta (deg): Sideslip**: The angle between the velocity vector and the body's x-axis in the body's x-y plane. Calculated from body-axis velocities and airspeed: β = arcsin(v / Airspeed).
+  - **Beta (deg): Sideslip**: The angle between the velocity vector and the body\'s x-axis in the body\'s x-y plane. Calculated from body-axis velocities and airspeed: β = arcsin(v / Airspeed).
 
   - **Airspeed (m/s)**: The magnitude of the velocity vector in the body frame. Calculated as the square root of the sum of the squares of the body-axis velocities: Airspeed = sqrt(u² + v² + w²).
 
@@ -342,10 +342,10 @@ The 6DOF simulation provides a comprehensive view of the aircraft's full motion.
   Each plot shows how these variables change over the simulation duration. The overlaid dotted lines on the input plots (Roll, Pitch, Yaw) represent the corresponding body-axis angle responses (phi, theta, psi) for easy comparison of command vs. result.
 
 - **The 3D Trajectory plot** shows two important aspects:
-  - The blue line shows the physical path of the aircraft through space (x, y, z coordinates in the NED frame). It visually represents the aircraft's movement over the ground.
-  - The red dashed line shows how the attitude (roll, pitch, yaw angles - phi, theta, psi) changes over time. This helps understand the aircraft's orientation during the flight path.
+  - The blue line shows the physical path of the aircraft through space (x, y, z coordinates in the NED frame). It visually represents the aircraft\'s movement over the ground.
+  - The red dashed line shows how the attitude (roll, pitch, yaw angles - phi, theta, psi) changes over time. This helps understand the aircraft\'s orientation during the flight path.
 
-  This visualization helps understand how control inputs affect both the aircraft's position and its orientation in 3D space, capturing the coupled nature of 6DOF flight.
+  This visualization helps understand how control inputs affect both the aircraft\'s position and its orientation in 3D space, capturing the coupled nature of 6DOF flight.
 
 The 6DOF simulation provides a much more complete picture of aircraft behavior than the 4DOF model, capturing cross-coupling effects between longitudinal and lateral-directional dynamics.
 
@@ -395,6 +395,22 @@ python -m reflex run
 ```
 
 4. Open your browser and navigate to http://localhost:3000
+
+### FlightGear Integration Setup
+
+1. Install FlightGear:
+   - Windows: Download from flightgear.org
+   - Linux: `sudo apt-get install flightgear`
+
+2. Install additional Python package:
+   ```bash
+   pip install python-flightgear
+   ```
+
+3. Configure FlightGear:
+   - Copy UAV model to FlightGear aircraft directory
+   - Launch simulator with FlightGear visualization mode
+   - Use provided launch script if needed
 
 ### Typical Workflow
 

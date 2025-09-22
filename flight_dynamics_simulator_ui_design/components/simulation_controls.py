@@ -22,6 +22,17 @@ def simulation_controls_section() -> rx.Component:
                 on_change=lambda val: FlightSimState.set_simulation_mode(val),
                 class_name="mt-1 block w-1/2 px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm mb-2",
             ),
+            rx.el.div(
+                rx.el.label(
+                    "Visualization Mode:",
+                    class_name="text-sm font-medium text-gray-700 mr-2",
+                ),
+                rx.radio(
+                    ["native", "flightgear"],
+                    value=FlightSimState.visualization_mode,
+                    on_change=FlightSimState.set_visualization_mode,
+                ),
+            ),
             class_name="mb-4",
         ),
         rx.el.div(
